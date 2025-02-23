@@ -1,0 +1,73 @@
+# Ignore .NET build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+*.swp
+
+# Ignore user-specific files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore package-related files
+packages/
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Ignore secrets and environment variables
+.env
+.env.local
+.env.development
+.env.production
+secrets.json
+appsettings.*.json
+
+# Ignore Docker-related files
+docker-compose.override.yml
+docker-compose.override.yaml
+**/docker-data/
+**/docker-logs/
+**/docker-entrypoint-initdb.d/
+
+# Ignore Redis data
+redis-data/
+dump.rdb
+appendonly.aof
+
+# Ignore generated files
+Generated/
+**/*.generated.cs
+
+# Ignore logs and cache
+logs/
+**/*.log
+**/*.bak
+**/*.tmp
+
+# Ignore Rider and JetBrains
+.idea/
+*.iml
+
+# Ignore test results
+TestResults/
+coverage/
+
+# Ignore compiled Python files if any
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore macOS files
+.DS_Store
+
+# Ignore Windows files
+Thumbs.db
+Desktop.ini
