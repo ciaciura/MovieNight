@@ -1,7 +1,10 @@
 using Infrastructure; // Ensure this is the correct namespace for AddInfrastructure
+using ApiService.Endpoints;
+using ApiService.Features.Users;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using MovieNight.Auth;
 using System.Text;
@@ -13,10 +16,6 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(new AuthorizeFilter());
-});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -49,6 +48,10 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
     options.AddPolicy(AdminApiKeyRequirement.PolicyName, policy =>
     {
         policy.RequireAuthenticatedUser();
@@ -60,6 +63,8 @@ builder.Services.AddSingleton<IAuthorizationHandler, AdminApiKeyHandler>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -73,7 +78,14 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+var usersGroup = app.MapGroup("/api/users")
+    .WithTags("Users")
+    .RequireAuthorization();
+
+UserGetAll.Register(usersGroup);
+UserGetById.Register(usersGroup);
+UserCreate.Register(usersGroup);
+UserDelete.Register(usersGroup);
 
 app.Run();
 

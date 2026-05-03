@@ -1,6 +1,6 @@
 using System;
 using Infrastructure.External.TMDB;
-using Infrastructure.Persistence;
+using Infrastructure.Data;
 
 namespace Infrastructure
 {

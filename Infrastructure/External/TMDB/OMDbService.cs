@@ -16,12 +16,12 @@ namespace Infrastructure.External.TMDB
         _logger = logger;
     }
 
-    public async Task<MovieDTO?> GetMovieAsync(string title)
+    public async Task<TMDBMovieView?> GetMovieAsync(string title)
     {
         var request = new RestRequest();
         try
         {
-            var response = await _client.GetAsync<MovieDTO>(request);
+            var response = await _client.GetAsync<TMDBMovieView>(request);
             return response ?? null;
         }
         catch (Exception ex)
