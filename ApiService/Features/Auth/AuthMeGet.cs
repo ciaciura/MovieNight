@@ -11,6 +11,13 @@ public sealed class AuthMeGet
     public static void Register(RouteGroupBuilder group)
     {
         group.MapGet("/me", Handle)
+            .WithTags("Auth")
+            .WithSummary("Get the current authenticated user")
+            .WithDescription("""
+                Returns identity information decoded from the bearer token:
+                user ID, display name, and whether the user holds the admin claim.
+                Requires a valid JWT bearer token.
+                """)
             .Produces<AuthMeResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }

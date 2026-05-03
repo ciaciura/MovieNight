@@ -1,6 +1,8 @@
 using Infrastructure; // Ensure this is the correct namespace for AddInfrastructure
 using ApiService.Endpoints.Modules;
 using FluentValidation;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -62,7 +64,39 @@ builder.Services.AddSingleton<IAuthorizationHandler, AdminApiKeyHandler>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((doc, context, ct) =>
+    {
+        doc.Info = new OpenApiInfo
+        {
+            Title = "MovieNight API",
+            Version = "v1",
+            Description = """
+                Internal API for the **MovieNight** application.
+
+                ## Authentication
+                Most endpoints require a **Bearer token** obtained from `POST /api/auth/token`.
+                Include it as `Authorization: Bearer <token>` on every protected request.
+
+                ## Admin endpoints
+                Administrative operations additionally require:
+                - The `admin` claim set to `true` in the JWT.
+                - A valid `X-Api-Key` header matching the server's configured admin API key.
+
+                ## Notes
+                - This API is **non-public** and intended for internal use only.
+                - All timestamps are UTC.
+                - Validation errors return RFC 9457 `ValidationProblem` responses.
+                """,
+            Contact = new OpenApiContact
+            {
+                Name = "MovieNight Team"
+            }
+        };
+        return Task.CompletedTask;
+    });
+});
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
@@ -72,7 +106,12 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "MovieNight API";
+        options.WithPreferredScheme("Bearer");
+    }).AllowAnonymous();
 }
 
 app.UseAuthentication();

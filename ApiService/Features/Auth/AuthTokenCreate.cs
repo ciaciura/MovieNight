@@ -16,6 +16,13 @@ public sealed class AuthTokenCreate
     {
         group.MapPost("/token", Handle)
             .AllowAnonymous()
+            .WithTags("Auth")
+            .WithSummary("Request a JWT access token")
+            .WithDescription("""
+                Authenticates a user by display name and returns a signed JWT bearer token.
+                The token includes identity claims and, where applicable, an admin claim.
+                No authentication is required to call this endpoint.
+                """)
             .Produces<AuthTokenCreateResponse>(StatusCodes.Status200OK)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized);

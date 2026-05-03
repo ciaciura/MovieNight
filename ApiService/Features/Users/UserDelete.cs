@@ -13,6 +13,13 @@ public sealed class UserDelete
     {
         group.MapDelete("/{id:int}", Handle)
             .RequireAuthorization(AdminApiKeyRequirement.PolicyName)
+            .WithTags("Users")
+            .WithSummary("Delete a user (admin only)")
+            .WithDescription("""
+                Permanently deletes the user with the specified ID.
+                Returns 404 if no user with that ID exists.
+                Requires a valid JWT bearer token with the admin claim and a valid X-Api-Key header.
+                """)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);

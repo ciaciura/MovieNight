@@ -14,6 +14,14 @@ public sealed class UserCreate
     public static void Register(RouteGroupBuilder group)
     {
         group.MapPost("/", Handle)
+            .WithTags("Users")
+            .WithSummary("Create a new user")
+            .WithDescription("""
+                Creates a new user with the given display name.
+                Display names are canonicalized and must be unique (case-insensitive).
+                Returns 409 if a user with the same normalized name already exists.
+                Requires a valid JWT bearer token.
+                """)
             .Produces(StatusCodes.Status201Created)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict);

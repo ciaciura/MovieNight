@@ -12,6 +12,13 @@ public sealed class UserGetById
     public static void Register(RouteGroupBuilder group)
     {
         group.MapGet("/{id:int}", Handle)
+            .WithTags("Users")
+            .WithSummary("Get a user by ID")
+            .WithDescription("""
+                Returns the user with the specified ID.
+                Returns 404 if no user with that ID exists.
+                Requires a valid JWT bearer token.
+                """)
             .Produces<UserGetByIdResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest);

@@ -10,6 +10,12 @@ public sealed class UserGetAll
     public static void Register(RouteGroupBuilder group)
     {
         group.MapGet("/", Handle)
+            .WithTags("Users")
+            .WithSummary("List all users")
+            .WithDescription("""
+                Returns all registered users ordered alphabetically by display name.
+                Requires a valid JWT bearer token.
+                """)
             .Produces<IReadOnlyList<UserGetAllResponse>>(StatusCodes.Status200OK);
     }
 
