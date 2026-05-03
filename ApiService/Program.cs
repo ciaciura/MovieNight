@@ -1,12 +1,11 @@
 using Infrastructure; // Ensure this is the correct namespace for AddInfrastructure
-using ApiService.Endpoints;
-using ApiService.Features.Users;
+using ApiService.Endpoints.Modules;
 using FluentValidation;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MovieNight.Auth;
+using Shared.Extensions.Users;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,15 +54,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(AdminApiKeyRequirement.PolicyName, policy =>
     {
         policy.RequireAuthenticatedUser();
+        policy.RequireClaim(UserClaimTypes.Admin, bool.TrueString);
         policy.Requirements.Add(new AdminApiKeyRequirement());
     });
 });
 builder.Services.AddSingleton<IAuthorizationHandler, AdminApiKeyHandler>();
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
@@ -78,14 +78,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-var usersGroup = app.MapGroup("/api/users")
-    .WithTags("Users")
-    .RequireAuthorization();
-
-UserGetAll.Register(usersGroup);
-UserGetById.Register(usersGroup);
-UserCreate.Register(usersGroup);
-UserDelete.Register(usersGroup);
+app.MapApiEndpoints();
 
 app.Run();
 
