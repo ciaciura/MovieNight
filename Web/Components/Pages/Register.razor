@@ -1,0 +1,191 @@
+@page "/register"
+
+@using Shared.Models.Persistence
+@using Shared.Models.Views.Users.Requests
+@using Shared.Models.Views.Users.Responses
+@using System.Text
+@using QRCoder
+
+@inject AuthApiClient AuthApiClient
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Register</PageTitle>
+
+<div class="auth-shell">
+    <section class="auth-hero">
+        <p class="auth-kicker">MovieNight</p>
+        <h1>Create your account</h1>
+        <p class="auth-copy">Pick a display name and choose your two-factor method for sign in.</p>
+    </section>
+
+    <section class="auth-card">
+        @if (!isRegistered)
+        {
+            <EditForm Model="request" OnSubmit="RegisterAsync" Context="formContext">
+                <div class="mb-3">
+                    <label class="form-label" for="display-name">Display name</label>
+                    <InputText id="display-name" class="form-control" @bind-Value="request.DisplayName" autocomplete="username" disabled="@isBusy" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="two-factor-method">Two-factor method</label>
+                    <InputSelect id="two-factor-method" class="form-select" @bind-Value="request.TwoFactorMethod" disabled="@isBusy">
+                        <option value="@TwoFactorMethod.Email">Email</option>
+                        <option value="@TwoFactorMethod.Authenticator">Authenticator App</option>
+                    </InputSelect>
+                </div>
+
+                @if (request.TwoFactorMethod == TwoFactorMethod.Email)
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email</label>
+                        <InputText id="email" class="form-control" @bind-Value="request.Email" autocomplete="email" disabled="@isBusy" />
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <p class="auth-error">@errorMessage</p>
+                }
+
+                <button class="btn btn-primary" type="submit" disabled="@isBusy">
+                    @(isBusy ? "Creating account..." : "Register")
+                </button>
+            </EditForm>
+        }
+        else
+        {
+            <div class="auth-card-header">
+                <div>
+                    <p class="auth-section-label">Registration complete</p>
+                    <h2>@(createdUser?.DisplayName ?? request.DisplayName)</h2>
+                </div>
+            </div>
+
+            <dl class="auth-details">
+                <div>
+                    <dt>User ID</dt>
+                    <dd>@(createdUser?.Id.ToString() ?? "Unknown")</dd>
+                </div>
+                <div>
+                    <dt>Two-factor method</dt>
+                    <dd>@(createdUser?.TwoFactorMethod.ToString() ?? request.TwoFactorMethod.ToString())</dd>
+                </div>
+            </dl>
+
+            @if (!string.IsNullOrWhiteSpace(createdUser?.TotpSetupUri))
+            {
+                <p class="register-note">Save this authenticator setup URI in a secure place before continuing:</p>
+                <textarea class="form-control register-setup-uri" readonly>@createdUser.TotpSetupUri</textarea>
+
+                @if (!string.IsNullOrWhiteSpace(qrCodeDataUri))
+                {
+                    <div class="register-qr-shell">
+                        <img class="register-qr-image" src="@qrCodeDataUri" alt="Authenticator QR code" />
+                    </div>
+                }
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-secondary" type="button" @onclick="CopySetupUriAsync">
+                        Copy setup URI
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(clipboardMessage))
+                {
+                    <p class="register-feedback">@clipboardMessage</p>
+                }
+            }
+
+            <a class="btn btn-primary" href="/">Continue to sign in</a>
+        }
+    </section>
+</div>
+
+@code {
+    private readonly UserCreateRequest request = new()
+    {
+        TwoFactorMethod = TwoFactorMethod.Email
+    };
+
+    private UserCreateResponse? createdUser;
+    private string? errorMessage;
+    private string? clipboardMessage;
+    private string? qrCodeDataUri;
+    private bool isBusy;
+    private bool isRegistered;
+
+    private async Task RegisterAsync(EditContext _)
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(request.DisplayName))
+        {
+            errorMessage = "Display name is required.";
+            return;
+        }
+
+        if (request.TwoFactorMethod == TwoFactorMethod.Email && string.IsNullOrWhiteSpace(request.Email))
+        {
+            errorMessage = "Email is required when using email two-factor authentication.";
+            return;
+        }
+
+        if (request.TwoFactorMethod == TwoFactorMethod.Authenticator)
+        {
+            request.Email = null;
+        }
+
+        isBusy = true;
+
+        try
+        {
+            var result = await AuthApiClient.RegisterAsync(request);
+            if (!result.Succeeded || result.Response is null)
+            {
+                errorMessage = result.ErrorMessage ?? "Unable to register the account.";
+                return;
+            }
+
+            createdUser = result.Response;
+            clipboardMessage = null;
+            qrCodeDataUri = string.IsNullOrWhiteSpace(createdUser.TotpSetupUri)
+                ? null
+                : CreateQrCodeDataUri(createdUser.TotpSetupUri);
+            isRegistered = true;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task CopySetupUriAsync()
+    {
+        if (string.IsNullOrWhiteSpace(createdUser?.TotpSetupUri))
+        {
+            clipboardMessage = "No authenticator setup URI is available to copy.";
+            return;
+        }
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", createdUser.TotpSetupUri);
+            clipboardMessage = "Setup URI copied to clipboard.";
+        }
+        catch
+        {
+            clipboardMessage = "Copy failed. Select and copy the URI manually.";
+        }
+    }
+
+    private static string CreateQrCodeDataUri(string setupUri)
+    {
+        using var generator = new QRCodeGenerator();
+        using var qrCodeData = generator.CreateQrCode(setupUri, QRCodeGenerator.ECCLevel.Q);
+        var svgQrCode = new SvgQRCode(qrCodeData);
+        var svg = svgQrCode.GetGraphic(8);
+        var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(svg));
+        return $"data:image/svg+xml;base64,{base64}";
+    }
+}

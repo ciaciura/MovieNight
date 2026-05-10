@@ -16,6 +16,7 @@ public sealed class UserCreate
     public static void Register(RouteGroupBuilder group)
     {
         group.MapPost("/", Handle)
+            .AllowAnonymous()
             .WithTags("Users")
             .WithSummary("Create a new user")
             .WithDescription("""
@@ -25,7 +26,7 @@ public sealed class UserCreate
                   - Email (1): provide a valid email address; an OTP will be sent on each sign-in.
                   - Authenticator (2): an otpauth:// setup URI is returned for QR code scanning.
                 Returns 409 if a user with the same normalized name already exists.
-                Requires a valid JWT bearer token.
+                This onboarding endpoint allows anonymous access in the internal API.
                 """)
             .Produces(StatusCodes.Status201Created)
             .ProducesValidationProblem(StatusCodes.Status400BadRequest)

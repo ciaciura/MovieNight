@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models.Views.Auth.Requests;
 using Shared.Models.Views.Auth.Responses;
+using Shared.Models.Views.Users.Requests;
+using Shared.Models.Views.Users.Responses;
 
 namespace MovieNight.Web.Auth;
 
@@ -65,6 +67,34 @@ public sealed class AuthApiClient(IHttpClientFactory httpClientFactory)
         return await response.Content.ReadFromJsonAsync<AuthMeResponse>(cancellationToken: cancellationToken);
     }
 
+    public async Task<RegisterRequestResult> RegisterAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
+    {
+        var client = httpClientFactory.CreateClient(AnonymousClientName);
+        using var response = await client.PostAsJsonAsync("/api/users", request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            var registerResponse = await response.Content.ReadFromJsonAsync<UserCreateResponse>(cancellationToken: cancellationToken);
+            return registerResponse is null
+                ? RegisterRequestResult.Failure("The registration response was empty.")
+                : RegisterRequestResult.Success(registerResponse);
+        }
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var validationProblem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(cancellationToken: cancellationToken);
+            var firstError = validationProblem?.Errors
+                .SelectMany(entry => entry.Value)
+                .FirstOrDefault(error => !string.IsNullOrWhiteSpace(error));
+
+            return RegisterRequestResult.Failure(firstError ?? "The registration request was invalid.");
+        }
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: cancellationToken);
+        var errorMessage = problem?.Detail ?? problem?.Title ?? "The registration request failed.";
+        return RegisterRequestResult.Failure(errorMessage);
+    }
+
     private static async Task<T> CreateFailureResultAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         where T : class
     {
@@ -109,4 +139,10 @@ public sealed record VerifyRequestResult(bool Succeeded, AuthVerifyResponse? Res
 {
     public static VerifyRequestResult Success(AuthVerifyResponse response) => new(true, response, null);
     public static VerifyRequestResult Failure(string errorMessage) => new(false, null, errorMessage);
+}
+
+public sealed record RegisterRequestResult(bool Succeeded, UserCreateResponse? Response, string? ErrorMessage)
+{
+    public static RegisterRequestResult Success(UserCreateResponse response) => new(true, response, null);
+    public static RegisterRequestResult Failure(string errorMessage) => new(false, null, errorMessage);
 }
