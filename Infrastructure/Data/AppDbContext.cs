@@ -5,6 +5,7 @@ namespace Infrastructure.Data
     public sealed class AppDbContext : DbContext
     {
         public DbSet<UserModel> Users => Set<UserModel>();
+        public DbSet<TwoFactorOtpModel> TwoFactorOtps => Set<TwoFactorOtpModel>();
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

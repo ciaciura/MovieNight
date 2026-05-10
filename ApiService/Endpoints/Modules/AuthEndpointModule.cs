@@ -11,6 +11,7 @@ public sealed class AuthEndpointModule : IEndpointModule
             .RequireAuthorization();
 
         AuthTokenCreate.Register(group);
+        AuthVerify.Register(group);
         AuthMeGet.Register(group);
     }
 }

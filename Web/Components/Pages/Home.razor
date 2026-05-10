@@ -1,7 +1,241 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@using Shared.Models.Persistence
 
-<h1>Hello, world!</h1>
+@inject AuthApiClient AuthApiClient
+@inject MovieNightAuthenticationStateProvider AuthenticationStateProvider
 
-Welcome to your new app.
+<PageTitle>MovieNight</PageTitle>
+
+<div class="auth-shell">
+	<section class="auth-hero">
+		<p class="auth-kicker">MovieNight</p>
+		<h1>Sign in with your display name</h1>
+		<p class="auth-copy">Two-factor authentication via email OTP or authenticator app.</p>
+	</section>
+
+	<AuthorizeView>
+		<Authorized>
+			<section class="auth-card">
+				<div class="auth-card-header">
+					<div>
+						<p class="auth-section-label">Signed in</p>
+						<h2>@(currentUser?.DisplayName ?? context.User.Identity?.Name)</h2>
+					</div>
+
+					@if (IsAdmin)
+					{
+						<span class="auth-badge">Admin</span>
+					}
+				</div>
+
+				<dl class="auth-details">
+					<div>
+						<dt>User ID</dt>
+						<dd>@(currentUser?.UserId.ToString() ?? "Unknown")</dd>
+					</div>
+					<div>
+						<dt>Role</dt>
+						<dd>@(IsAdmin ? "Administrator" : "Member")</dd>
+					</div>
+					<div>
+						<dt>Status</dt>
+						<dd>Authenticated against /api/auth/me</dd>
+					</div>
+				</dl>
+
+				@if (!string.IsNullOrWhiteSpace(errorMessage))
+				{
+					<p class="auth-error">@errorMessage</p>
+				}
+
+				<button class="btn btn-outline-secondary" @onclick="SignOutAsync" disabled="@isBusy">Sign out</button>
+			</section>
+		</Authorized>
+
+		<NotAuthorized>
+			<section class="auth-card">
+				@if (!hasChallengeToken)
+				{
+					<!-- Step 1: Display Name Entry -->
+					<EditForm Model="request" OnSubmit="RequestChallengeAsync" Context="formContext">
+						<div class="mb-3">
+							<label class="form-label" for="display-name">Display name</label>
+							<InputText id="display-name" class="form-control" @bind-Value="request.DisplayName" autocomplete="username" disabled="@isBusy" />
+						</div>
+
+						@if (!string.IsNullOrWhiteSpace(errorMessage))
+						{
+							<p class="auth-error">@errorMessage</p>
+						}
+
+						<button class="btn btn-primary" type="submit" disabled="@isBusy">
+							@(isBusy ? "Requesting sign-in..." : "Sign in")
+						</button>
+					</EditForm>
+				}
+				else
+				{
+					<!-- Step 2: 2FA Code Entry -->
+					<div class="mb-3">
+						<p class="auth-section-label">Two-Factor Authentication</p>
+						<p class="auth-copy">
+							@if (challengeMethod == TwoFactorMethod.Email)
+							{
+								<span>We've sent a 6-digit code to your email. Enter it below.</span>
+							}
+							else
+							{
+								<span>Enter the 6-digit code from your authenticator app.</span>
+							}
+						</p>
+					</div>
+
+					<EditForm Model="verifyRequest" OnSubmit="VerifyCodeAsync" Context="formContext">
+						<div class="mb-3">
+							<label class="form-label" for="otp-code">Verification code</label>
+							<InputText 
+								id="otp-code" 
+								class="form-control" 
+								@bind-Value="verifyRequest.Code" 
+								maxlength="6"
+								inputmode="numeric" 
+								placeholder="000000"
+								disabled="@isBusy" 
+								autocomplete="one-time-code" />
+						</div>
+
+						@if (!string.IsNullOrWhiteSpace(errorMessage))
+						{
+							<p class="auth-error">@errorMessage</p>
+						}
+
+						<div class="d-flex gap-2">
+							<button class="btn btn-primary" type="submit" disabled="@isBusy">
+								@(isBusy ? "Verifying..." : "Verify")
+							</button>
+							<button class="btn btn-outline-secondary" type="button" @onclick="RestartSignInAsync" disabled="@isBusy">
+								Back
+							</button>
+						</div>
+					</EditForm>
+				}
+			</section>
+		</NotAuthorized>
+	</AuthorizeView>
+</div>
+
+@code {
+	private readonly AuthTokenCreateRequest request = new();
+	private readonly AuthVerifyRequest verifyRequest = new();
+	private AuthMeResponse? currentUser;
+	private string? errorMessage;
+	private bool isBusy;
+	private bool hasChallengeToken;
+	private TwoFactorMethod challengeMethod;
+
+	private bool IsAdmin => currentUser?.IsAdmin ?? false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		if (authenticationState.User.Identity?.IsAuthenticated is true)
+		{
+			currentUser = await AuthApiClient.GetCurrentUserAsync();
+		}
+	}
+
+	private async Task RequestChallengeAsync(EditContext _)
+	{
+		errorMessage = null;
+
+		if (string.IsNullOrWhiteSpace(request.DisplayName))
+		{
+			errorMessage = "Display name is required.";
+			return;
+		}
+
+		isBusy = true;
+
+		try
+		{
+			var result = await AuthApiClient.RequestChallengeAsync(request.DisplayName);
+			if (!result.Succeeded || result.Response is null)
+			{
+				errorMessage = result.ErrorMessage ?? "Unable to request sign-in.";
+				return;
+			}
+
+			// Move to Step 2: 2FA verification
+			await AuthenticationStateProvider.SetChallengeAsync(result.Response.ChallengeToken, result.Response.TwoFactorMethod);
+			hasChallengeToken = true;
+			challengeMethod = result.Response.TwoFactorMethod;
+			verifyRequest.ChallengeToken = result.Response.ChallengeToken;
+		}
+		finally
+		{
+			isBusy = false;
+		}
+	}
+
+	private async Task VerifyCodeAsync(EditContext _)
+	{
+		errorMessage = null;
+
+		if (string.IsNullOrWhiteSpace(verifyRequest.Code) || verifyRequest.Code.Length != 6)
+		{
+			errorMessage = "Please enter a 6-digit code.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(verifyRequest.ChallengeToken))
+		{
+			errorMessage = "Challenge session lost. Please sign in again.";
+			hasChallengeToken = false;
+			return;
+		}
+
+		isBusy = true;
+
+		try
+		{
+			var result = await AuthApiClient.VerifyAsync(verifyRequest.ChallengeToken, verifyRequest.Code);
+			if (!result.Succeeded || result.Response is null)
+			{
+				errorMessage = result.ErrorMessage ?? "Verification failed. Please try again.";
+				return;
+			}
+
+			// Sign in with the access token from verify response
+			await AuthenticationStateProvider.SignInAsync(result.Response);
+			currentUser = await AuthApiClient.GetCurrentUserAsync();
+
+			// Reset form
+			request.DisplayName = string.Empty;
+			verifyRequest.Code = string.Empty;
+			verifyRequest.ChallengeToken = string.Empty;
+			hasChallengeToken = false;
+		}
+		finally
+		{
+			isBusy = false;
+		}
+	}
+
+	private async Task RestartSignInAsync()
+	{
+		hasChallengeToken = false;
+		verifyRequest.Code = string.Empty;
+		verifyRequest.ChallengeToken = string.Empty;
+		errorMessage = null;
+		await AuthenticationStateProvider.SignOutAsync();
+	}
+
+	private async Task SignOutAsync()
+	{
+		await AuthenticationStateProvider.SignOutAsync();
+		currentUser = null;
+		errorMessage = null;
+		hasChallengeToken = false;
+	}
+}

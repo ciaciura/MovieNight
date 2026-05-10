@@ -1,5 +1,7 @@
 using MovieNight.Web;
 using MovieNight.Web.Components;
+using MovieNight.Web.Auth;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +12,27 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorizationCore();
 builder.Services.AddOutputCache();
+builder.Services.AddScoped<AuthSession>();
+builder.Services.AddScoped<MovieNightAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(serviceProvider =>
+    serviceProvider.GetRequiredService<MovieNightAuthenticationStateProvider>());
+builder.Services.AddScoped<ApiAccessTokenHandler>();
+
+builder.Services.AddHttpClient(AuthApiClient.AnonymousClientName, client =>
+    {
+        client.BaseAddress = new("https+http://apiservice");
+    });
+
+builder.Services.AddHttpClient(AuthApiClient.AuthenticatedClientName, client =>
+    {
+        client.BaseAddress = new("https+http://apiservice");
+    })
+    .AddHttpMessageHandler<ApiAccessTokenHandler>();
+
+builder.Services.AddScoped<AuthApiClient>();
 
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {

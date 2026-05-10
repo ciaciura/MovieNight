@@ -1,6 +1,6 @@
-using System;
 using Infrastructure.External.TMDB;
 using Infrastructure.Data;
+using Infrastructure.Services;
 
 namespace Infrastructure
 {
@@ -13,6 +13,8 @@ namespace Infrastructure
             {
                 options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
             });
+            services.AddScoped<ITwoFactorService, TwoFactorService>();
+            services.AddScoped<IEmailService, LogEmailService>();
             return services;
         }
     }

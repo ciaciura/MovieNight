@@ -8,6 +8,17 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
+        <div class="nav-item px-3 nav-status">
+            <AuthorizeView>
+                <Authorized>
+                    Signed in as @context.User.Identity?.Name
+                </Authorized>
+                <NotAuthorized>
+                    Signed out
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home

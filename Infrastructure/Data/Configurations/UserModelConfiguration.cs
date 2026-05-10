@@ -23,7 +23,21 @@ public sealed class UserModelConfiguration : IEntityTypeConfiguration<UserModel>
         builder.Property(m => m.CreatedAtUtc)
             .IsRequired();
 
+        builder.Property(m => m.TwoFactorMethod)
+            .IsRequired()
+            .HasConversion<int>();
+
+        builder.Property(m => m.Email)
+            .HasMaxLength(320);
+
+        builder.Property(m => m.TotpSecret)
+            .HasMaxLength(64);
+
         builder.HasIndex(m => m.NormalizedDisplayName)
             .IsUnique();
+
+        builder.HasIndex(m => m.Email)
+            .IsUnique()
+            .HasFilter("\"Email\" IS NOT NULL");
     }
 }
