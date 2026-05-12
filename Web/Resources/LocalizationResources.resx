@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Microsoft ResX File, format version 2.0 -->
+  <!-- To add a localized resource simply add an entry to this file and a localized version file with the same name. -->
+  <!-- codesys: System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089 -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata" type="xsd:string" minOccurs="0" />
+          <xsd:element name="assembly" type="xsd:string" minOccurs="0" />
+          <xsd:element name="data" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+          <xsd:element name="resheader" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="App.Title" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>MovieNight</value>
+  </data>
+  <data name="App.SignOut" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Sign Out</value>
+  </data>
+  <data name="App.SignIn" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Sign In</value>
+  </data>
+  <data name="Auth.Welcome" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Welcome to MovieNight</value>
+  </data>
+  <data name="Auth.RegisterNew" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Create New Account</value>
+  </data>
+  <data name="Auth.SignInExisting" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Sign In to Existing Account</value>
+  </data>
+  <data name="Common.Confirm" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Confirm</value>
+  </data>
+  <data name="Common.Cancel" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Cancel</value>
+  </data>
+  <data name="Common.Delete" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Delete</value>
+  </data>
+  <data name="Common.Save" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Save</value>
+  </data>
+  <data name="Common.Edit" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Edit</value>
+  </data>
+  <data name="Common.Close" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Close</value>
+  </data>
+  <data name="Validation.Required" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>This field is required.</value>
+  </data>
+  <data name="Validation.InvalidEmail" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Please enter a valid email address.</value>
+  </data>
+  <data name="Validation.PasswordTooShort" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Password must be at least 8 characters long.</value>
+  </data>
+</root>

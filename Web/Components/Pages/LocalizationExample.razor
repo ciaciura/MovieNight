@@ -1,0 +1,85 @@
+@page "/examples/localization"
+@inject ILocalizationService Localization
+@using MovieNight.Web.Services
+
+<div class="container mt-4">
+    <h1>@Localization.GetString("App.Title") - Localization Example</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Language Selection</h5>
+        </div>
+        <div class="card-body">
+            <CultureSelector />
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Current Language Settings</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Current Culture:</strong> @Localization.CurrentCulture.DisplayName (@Localization.CurrentCulture.Name)</p>
+            <p><strong>Culture Code:</strong> @Localization.CurrentCulture.Name</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Translation Examples</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Translation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>App.Title</td>
+                        <td>@Localization.GetString("App.Title")</td>
+                    </tr>
+                    <tr>
+                        <td>Auth.Welcome</td>
+                        <td>@Localization.GetString("Auth.Welcome")</td>
+                    </tr>
+                    <tr>
+                        <td>Common.Save</td>
+                        <td>@Localization.GetString("Common.Save")</td>
+                    </tr>
+                    <tr>
+                        <td>Common.Delete</td>
+                        <td>@Localization.GetString("Common.Delete")</td>
+                    </tr>
+                    <tr>
+                        <td>Common.Confirm</td>
+                        <td>@Localization.GetString("Common.Confirm")</td>
+                    </tr>
+                    <tr>
+                        <td>Validation.Required</td>
+                        <td>@Localization.GetString("Validation.Required")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>All Supported Languages</h5>
+        </div>
+        <div class="card-body">
+            <ul>
+                @foreach (var culture in Localization.SupportedCultures)
+                {
+                    <li>@culture.DisplayName (@culture.Name)</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+}

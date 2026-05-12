@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Polish (Poland) Translations -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata" type="xsd:string" minOccurs="0" />
+          <xsd:element name="assembly" type="xsd:string" minOccurs="0" />
+          <xsd:element name="data" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+          <xsd:element name="resheader" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="App.Title" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>MovieNight</value>
+  </data>
+  <data name="App.SignOut" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Wyloguj się</value>
+  </data>
+  <data name="App.SignIn" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Zaloguj się</value>
+  </data>
+  <data name="Auth.Welcome" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Witaj w MovieNight</value>
+  </data>
+  <data name="Auth.RegisterNew" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Utwórz Nowe Konto</value>
+  </data>
+  <data name="Auth.SignInExisting" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Zaloguj się do Istniejącego Konta</value>
+  </data>
+  <data name="Common.Confirm" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Potwierdź</value>
+  </data>
+  <data name="Common.Cancel" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Anuluj</value>
+  </data>
+  <data name="Common.Delete" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Usuń</value>
+  </data>
+  <data name="Common.Save" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Zapisz</value>
+  </data>
+  <data name="Common.Edit" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Edytuj</value>
+  </data>
+  <data name="Common.Close" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Zamknij</value>
+  </data>
+  <data name="Validation.Required" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>To pole jest wymagane.</value>
+  </data>
+  <data name="Validation.InvalidEmail" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Proszę wprowadź prawidłowy adres e-mail.</value>
+  </data>
+  <data name="Validation.PasswordTooShort" type="System.Resources.ResXString, System.Windows.Forms">
+    <value>Hasło musi zawierać co najmniej 8 znaków.</value>
+  </data>
+</root>

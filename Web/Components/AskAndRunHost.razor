@@ -1,0 +1,77 @@
+@implements IAsyncDisposable
+@inject IAskAndRunService AskAndRunService
+@using MovieNight.Web.Services
+
+<div class="modal @(IsVisible ? "show d-block" : "")" tabindex="-1" role="dialog" style="@(IsVisible ? "display: block; background-color: rgba(0,0,0,0.5);" : "display: none;")">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="btn-close" @onclick="OnCancel" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Message
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="OnConfirm">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsVisible { get; set; }
+    private string Title { get; set; } = "Confirm";
+    private string Message { get; set; } = "";
+
+    protected override void OnInitialized()
+    {
+        if (AskAndRunService is AskAndRunService service)
+        {
+            service.OnShowModal += ShowModal;
+            service.OnHideModal += HideModal;
+        }
+    }
+
+    private void ShowModal(string title, string message)
+    {
+        Title = title;
+        Message = message;
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    private void HideModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private void OnConfirm()
+    {
+        if (AskAndRunService is AskAndRunService service)
+        {
+            service.Confirm();
+        }
+        HideModal();
+    }
+
+    private void OnCancel()
+    {
+        if (AskAndRunService is AskAndRunService service)
+        {
+            service.Cancel();
+        }
+        HideModal();
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (AskAndRunService is AskAndRunService service)
+        {
+            service.OnShowModal -= ShowModal;
+            service.OnHideModal -= HideModal;
+        }
+    }
+}
